@@ -1,0 +1,22 @@
+.daily-log-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(180px, 1fr));
+  gap: 16px;
+  align-items: start;
+  overflow-x: auto;
+}
+
+.daily-log-day-column {
+  min-width: 180px;
+  border: 1px solid #ccc;
+  padding: 12px;
+}
+
+.daily-log-day-header h2,
+.daily-log-day-header p {
+  margin: 0;
+}
+
+.daily-log-day-header p {
+  margin-top: 4px;
+}
