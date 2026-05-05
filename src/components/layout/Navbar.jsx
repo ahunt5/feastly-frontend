@@ -25,6 +25,7 @@ export default function Navbar() {
         { label: "Dashboard", path: "/" },
         { label: "Ingredient Search", path: "/ingredients/search" },
         { label: "Meals", path: "/meals" },
+        { label: "AI Recipes", path: "/ai-recipes" },
         { label: "Logout", path: "/logout" },
       ]
     : [

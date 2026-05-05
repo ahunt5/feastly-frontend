@@ -1,4 +1,4 @@
-const API_PREFIX = import.meta.env.VITE_API;
+const API_PREFIX = import.meta.env.VITE_API || "/api";
 
 async function apiRequest(path, options = {}) {
   const response = await fetch(`${API_PREFIX}${path}`, {

@@ -81,7 +81,7 @@ const weekGridSx = {
   display: "grid",
   gridTemplateColumns: "repeat(7, 1fr)",
   gap: 2,
-  alignItems: "start",
+  alignItems: "stretch",
 };
 
 const dayColumnSx = {
@@ -92,6 +92,7 @@ const dayColumnSx = {
   borderRadius: 3,
   backgroundColor: "#ffffff",
   minWidth: 0,
+  height: "100%",
 };
 
 const activeDayColumnSx = {
@@ -136,7 +137,7 @@ function shiftDateByDays(dateString, days) {
 // -----------------------------
 // Main Component
 // -----------------------------
-export default function DailyLogPage() {
+export default function DailyLogPage({ onMealsChanged }) {
   const { token } = useAuth(); // Logged-in user's token
 
   // The date selected by the user; determines which week is displayed
@@ -288,6 +289,7 @@ export default function DailyLogPage() {
         ),
       );
 
+      onMealsChanged?.();
       setError(null);
       handleCloseMealPicker();
     } catch (createError) {
@@ -313,6 +315,7 @@ export default function DailyLogPage() {
         },
       }));
 
+      onMealsChanged?.();
       setError(null);
     } catch (deleteError) {
       setError(deleteError.message || "Could not delete meal.");

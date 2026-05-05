@@ -1,47 +1,122 @@
 import { useEffect, useState } from "react";
 import { Box, Typography, Alert, Paper, CircularProgress } from "@mui/material";
+import { useAuth } from "../auth/AuthContext";
 
-// Mock data (replace later with API call)
-const MOCK_DAILY_TOTALS = {
-  calories: 1850,
-  protein: 130,
-  carbs: 160,
-  fat: 65,
+const API = import.meta.env.VITE_API || "/api";
+
+const EMPTY_TOTALS = {
+  calories: 0,
+  protein: 0,
+  carbs: 0,
+  fat: 0,
 };
 
-/** Displays the user's daily calorie and macro totals as dashboard cards. */
-export default function DailyTotals() {
-  const [dailyTotals, setDailyTotals] = useState({
-    calories: 0,
-    protein: 0,
-    carbs: 0,
-    fat: 0,
+async function parseResponse(response) {
+  const text = await response.text();
+
+  if (!text) return {};
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { message: text };
+  }
+}
+
+function normalizeDailyTotals(data) {
+  return {
+    calories: data?.total_calories ?? data?.calories ?? 0,
+    protein: data?.total_protein ?? data?.protein ?? 0,
+    carbs: data?.total_carbs ?? data?.carbs ?? 0,
+    fat: data?.total_fat ?? data?.fat ?? 0,
+  };
+}
+
+async function fetchTodayTotals(token) {
+  const response = await fetch(`${API}/dailyTotals/me/today`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const data = await parseResponse(response);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.error || "Could not load totals.");
+  }
+
+  return normalizeDailyTotals(data);
+}
+
+function TotalCard({ label, value, suffix = "", backgroundColor }) {
+  return (
+    <Paper
+      elevation={3}
+      sx={{
+        p: 2.5,
+        borderRadius: 3,
+        backgroundColor,
+        textAlign: "center",
+        transition: "0.2s",
+        "&:hover": {
+          transform: "translateY(-4px)",
+          boxShadow: 6,
+        },
+      }}
+    >
+      <Typography variant="subtitle2" color="text.secondary">
+        {label}
+      </Typography>
+      <Typography variant="h5" fontWeight="bold">
+        {Math.round(value)}
+        {suffix}
+      </Typography>
+    </Paper>
+  );
+}
+
+/** Displays the user's real daily calorie and macro totals from the backend. */
+export default function DailyTotals({ refreshKey = 0 }) {
+  const { token } = useAuth();
+  const [dailyTotals, setDailyTotals] = useState(EMPTY_TOTALS);
+  const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      loadDailyTotals();
-    }, 300);
+    let ignore = false;
 
-    return () => clearTimeout(timeoutId);
-  }, []);
+    async function loadDailyTotals() {
+      if (!token) {
+        setDailyTotals(EMPTY_TOTALS);
+        setErrorMessage("You must be logged in to view daily totals.");
+        setIsLoading(false);
+        return;
+      }
 
-  const loadDailyTotals = () => {
-    try {
-      setIsLoading(true);
-      setErrorMessage("");
+      try {
+        setIsLoading(true);
+        setErrorMessage("");
+        const totals = await fetchTodayTotals(token);
 
-      // Replace this with API call later
-      setDailyTotals(MOCK_DAILY_TOTALS);
-    } catch (error) {
-      console.error("Error loading daily totals:", error);
-      setErrorMessage("Could not load daily totals.");
-    } finally {
-      setIsLoading(false);
+        if (!ignore) {
+          setDailyTotals(totals);
+        }
+      } catch (error) {
+        if (!ignore) {
+          setErrorMessage(error.message || "Could not load daily totals.");
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
     }
-  };
+
+    loadDailyTotals();
+
+    return () => {
+      ignore = true;
+    };
+  }, [token, refreshKey]);
 
   if (errorMessage) {
     return <Alert severity="error">{errorMessage}</Alert>;
@@ -67,97 +142,29 @@ export default function DailyTotals() {
         gap: 2,
       }}
     >
-      {/* Calories Card */}
-      <Paper
-        elevation={3}
-        sx={{
-          p: 2.5,
-          borderRadius: 3,
-          backgroundColor: "#e3f2fd",
-          textAlign: "center",
-          transition: "0.2s",
-          "&:hover": {
-            transform: "translateY(-4px)",
-            boxShadow: 6,
-          },
-        }}
-      >
-        <Typography variant="subtitle2" color="text.secondary">
-          Calories
-        </Typography>
-        <Typography variant="h5" fontWeight="bold">
-          {dailyTotals.calories}
-        </Typography>
-      </Paper>
-
-      {/* Protein Card */}
-      <Paper
-        elevation={3}
-        sx={{
-          p: 2.5,
-          borderRadius: 3,
-          backgroundColor: "#e8f5e9",
-          textAlign: "center",
-          transition: "0.2s",
-          "&:hover": {
-            transform: "translateY(-4px)",
-            boxShadow: 6,
-          },
-        }}
-      >
-        <Typography variant="subtitle2" color="text.secondary">
-          Protein
-        </Typography>
-        <Typography variant="h5" fontWeight="bold">
-          {dailyTotals.protein}g
-        </Typography>
-      </Paper>
-
-      {/* Carbs Card */}
-      <Paper
-        elevation={3}
-        sx={{
-          p: 2.5,
-          borderRadius: 3,
-          backgroundColor: "#fff3e0",
-          textAlign: "center",
-          transition: "0.2s",
-          "&:hover": {
-            transform: "translateY(-4px)",
-            boxShadow: 6,
-          },
-        }}
-      >
-        <Typography variant="subtitle2" color="text.secondary">
-          Carbs
-        </Typography>
-        <Typography variant="h5" fontWeight="bold">
-          {dailyTotals.carbs}g
-        </Typography>
-      </Paper>
-
-      {/* Fat Card */}
-      <Paper
-        elevation={3}
-        sx={{
-          p: 2.5,
-          borderRadius: 3,
-          backgroundColor: "#fce4ec",
-          textAlign: "center",
-          transition: "0.2s",
-          "&:hover": {
-            transform: "translateY(-4px)",
-            boxShadow: 6,
-          },
-        }}
-      >
-        <Typography variant="subtitle2" color="text.secondary">
-          Fat
-        </Typography>
-        <Typography variant="h5" fontWeight="bold">
-          {dailyTotals.fat}g
-        </Typography>
-      </Paper>
+      <TotalCard
+        label="Calories"
+        value={dailyTotals.calories}
+        backgroundColor="#e3f2fd"
+      />
+      <TotalCard
+        label="Protein"
+        value={dailyTotals.protein}
+        suffix="g"
+        backgroundColor="#e8f5e9"
+      />
+      <TotalCard
+        label="Carbs"
+        value={dailyTotals.carbs}
+        suffix="g"
+        backgroundColor="#fff3e0"
+      />
+      <TotalCard
+        label="Fat"
+        value={dailyTotals.fat}
+        suffix="g"
+        backgroundColor="#fce4ec"
+      />
     </Box>
   );
 }

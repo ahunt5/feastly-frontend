@@ -21,7 +21,7 @@
 ======================================== */
 
 /* Stores the base API route prefix so every request starts with "/api" */
-const API_PREFIX = import.meta.env.VITE_API;
+const API_PREFIX = import.meta.env.VITE_API || "/api";
 
 /* 
    Reusable helper function for all API requests.

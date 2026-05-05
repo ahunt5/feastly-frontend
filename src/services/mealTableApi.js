@@ -2,7 +2,7 @@
 import { toApiMealType, toUiMealType } from "./mealApi";
 
 // Define a constant prefix for all API endpoints
-const BASE_URL = import.meta.env.VITE_API;
+const BASE_URL = import.meta.env.VITE_API || "/api";
 
 // Define a reusable async function to make API requests
 async function apiRequest(path, options = {}) {

@@ -1,6 +1,7 @@
-import { createContext, useContext, useEffect, useState } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState } from "react";
 
-const API = import.meta.env.VITE_API;
+const API = import.meta.env.VITE_API || "/api";
 
 const AuthContext = createContext();
 

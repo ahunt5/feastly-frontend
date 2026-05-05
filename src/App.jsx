@@ -5,11 +5,13 @@ import LoginPage from "./pages/Login.jsx";
 import RegisterPage from "./pages/Register.jsx";
 import LogoutPage from "./pages/Logout.jsx";
 import Error404 from "./pages/Error404.jsx";
-import Dashboard from "./pages/dashboard.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
 import IngredientSearchPage from "./pages/IngredientSearch.jsx";
 import MealsPage from "./pages/MealsPage.jsx";
 import { useAuth } from "./auth/AuthContext.jsx";
 import RequireLogin from "./components/RequireLogin.jsx";
+import AccountPage from "./pages/Account.jsx";
+import AIPage from "./pages/AIPage.jsx";
 
 function App() {
   const { token } = useAuth();
@@ -19,6 +21,8 @@ function App() {
       <Route element={<Layout />}>
         <Route index element={<Dashboard />} />
         <Route path="/meals" element={<MealsPage />} />
+        <Route path="/ai-recipes" element={<AIPage />} />
+        <Route path="/account" element={<AccountPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/logout" element={<LogoutPage />} />

@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Box, Paper, Typography, Divider } from "@mui/material";
 import DailyTotals from "./DailyTotals";
 import DailyLogPage from "./DailyLogPage";
 
 export default function Dashboard() {
+  const [totalsRefreshKey, setTotalsRefreshKey] = useState(0);
+
   return (
     <Box
       sx={{
@@ -39,7 +42,7 @@ export default function Dashboard() {
           Your nutrition summary for today.
         </Typography>
         <Divider sx={{ mb: 3 }} />
-        <DailyTotals />
+        <DailyTotals refreshKey={totalsRefreshKey} />
       </Paper>
 
       <Paper
@@ -56,7 +59,9 @@ export default function Dashboard() {
           Plan and manage your meals for the week.
         </Typography>
         <Divider sx={{ mb: 3 }} />
-        <DailyLogPage />
+        <DailyLogPage
+          onMealsChanged={() => setTotalsRefreshKey((current) => current + 1)}
+        />
       </Paper>
     </Box>
   );
